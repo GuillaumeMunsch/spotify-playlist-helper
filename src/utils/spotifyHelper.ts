@@ -23,4 +23,14 @@ export const spotifyHelperInitializer = async () => {
 
 export class SpotifyHelper {
   constructor(private spotifyApi: SpotifyWebApi) {}
+
+  async getMySavedTracks(): Promise<SpotifyApi.UsersSavedTracksResponse> {
+    const data = await this.spotifyApi.getMySavedTracks();
+    return data.body;
+  }
+
+  async getUser(userId: string) {
+    const data = await this.spotifyApi.getUser(userId);
+    return data.body;
+  }
 }
