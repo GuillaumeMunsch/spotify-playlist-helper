@@ -2,9 +2,6 @@ import SpotifyWebApi from 'spotify-web-api-node';
 import dotenv from 'dotenv';
 dotenv.config();
 
-
-const code = '';
-
 export const spotifyHelperInitializer = async () => {
   const scopes = ['user-read-private', 'user-read-email'];
   const state = 'my-private-spotify-helper';
@@ -14,31 +11,32 @@ export const spotifyHelperInitializer = async () => {
     clientSecret: process.env.CLIENT_SECRET,
     redirectUri: redirectUri,
   });
-
-  if (!code) {
-    const authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
-    console.log('authorizeURL', authorizeURL);
-    return;
-  }
-
-  spotifyApi.authorizationCodeGrant(code);
-  const credentials = await spotifyApi.authorizationCodeGrant(code);
-  if (!credentials.body?.access_token) {
-    console.log(
-      'Something went wrong when retrieving an access token',
-      credentials,
-    );
-    return null;
-  }
-  spotifyApi.setAccessToken(credentials.body['access_token']);
-  spotifyApi.setRefreshToken(credentials.body['refresh_token']);
-  console.log('spotifyApi initialized');
+  const authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+  console.log('authorizeURL', authorizeURL);
 
   return spotifyApi;
 };
 
 export class SpotifyHelper {
   constructor(private spotifyApi: SpotifyWebApi) {}
+
+  async loginWithCode(code: string) {
+    const credentials = await this.spotifyApi.authorizationCodeGrant(code);
+    console.log('credentials', credentials);
+
+    if (!credentials.body?.access_token) {
+      console.log(
+        'Something went wrong when retrieving an access token',
+        credentials,
+      );
+      return null;
+    }
+    this.spotifyApi.setAccessToken(credentials.body['access_token']);
+    this.spotifyApi.setRefreshToken(credentials.body['refresh_token']);
+    console.log('spotifyApi initialized');
+
+    return this.spotifyApi;
+  }
 
   async getMySavedTracks(): Promise<SpotifyApi.UsersSavedTracksResponse> {
     const data = await this.spotifyApi.getMySavedTracks();

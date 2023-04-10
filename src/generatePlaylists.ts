@@ -1,42 +1,37 @@
-import fastify from 'fastify';
+import fastify, { FastifyRequest } from 'fastify';
 import { SpotifyHelper, spotifyHelperInitializer } from './utils/spotifyHelper';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const generatePlaylists = async () => {
+type MyRequest = FastifyRequest<{
+  Querystring: { code: string };
+}>;
+
+const start = async () => {
   const api = await spotifyHelperInitializer();
   if (!api) {
     return;
   }
   const spotifyHelper = new SpotifyHelper(api);
 
-  if (!process.env.MY_USER_ID) {
-    console.log('No MY_USER_ID provided in env');
+  const fastifyInstance = fastify();
+  fastifyInstance.get('/spotify-code', async (request: MyRequest, reply) => {
+    console.log('request.query', request.query);
+    const { code } = request.query;
 
-    return;
-  }
+    console.log('Code', code);
 
-  const savedSongs = await spotifyHelper.getMySavedTracks();
-  console.log('Saved songs', savedSongs.total);
+    spotifyHelper.loginWithCode(code);
+
+    return {};
+  });
+
+  fastifyInstance.listen(3000, (err, address) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    console.log(`Server listening on ${address}`);
+  });
 };
-
-const fastifyInstance = fastify();
-fastifyInstance.get('/spotify-code', async (request, reply) => {
-  console.log('request.query', request.query);
-
-  return {};
-});
-
-fastifyInstance.listen(3000, (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`Server listening on ${address}`);
-});
-
-try {
-  generatePlaylists();
-} catch (error) {
-  console.log('ERROR ICI');
-}
+start();
