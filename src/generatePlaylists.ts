@@ -1,3 +1,4 @@
+import fastify from 'fastify';
 import { SpotifyHelper, spotifyHelperInitializer } from './utils/spotifyHelper';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -19,4 +20,23 @@ const generatePlaylists = async () => {
   console.log('Saved songs', savedSongs.total);
 };
 
-generatePlaylists();
+const fastifyInstance = fastify();
+fastifyInstance.get('/spotify-code', async (request, reply) => {
+  console.log('request.query', request.query);
+
+  return {};
+});
+
+fastifyInstance.listen(3000, (err, address) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log(`Server listening on ${address}`);
+});
+
+try {
+  generatePlaylists();
+} catch (error) {
+  console.log('ERROR ICI');
+}

@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "dotenv": "^16.0.3",
+    "fastify": "^4.15.0",
     "spotify-web-api-node": "^5.0.2"
   }
 }

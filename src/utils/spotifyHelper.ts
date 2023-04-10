@@ -2,12 +2,27 @@ import SpotifyWebApi from 'spotify-web-api-node';
 import dotenv from 'dotenv';
 dotenv.config();
 
+
+const code = '';
+
 export const spotifyHelperInitializer = async () => {
+  const scopes = ['user-read-private', 'user-read-email'];
+  const state = 'my-private-spotify-helper';
+  const redirectUri = 'http://localhost:3000/spotify-code';
   const spotifyApi = new SpotifyWebApi({
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
+    redirectUri: redirectUri,
   });
-  const credentials = await spotifyApi.clientCredentialsGrant();
+
+  if (!code) {
+    const authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+    console.log('authorizeURL', authorizeURL);
+    return;
+  }
+
+  spotifyApi.authorizationCodeGrant(code);
+  const credentials = await spotifyApi.authorizationCodeGrant(code);
   if (!credentials.body?.access_token) {
     console.log(
       'Something went wrong when retrieving an access token',
@@ -15,9 +30,10 @@ export const spotifyHelperInitializer = async () => {
     );
     return null;
   }
+  spotifyApi.setAccessToken(credentials.body['access_token']);
+  spotifyApi.setRefreshToken(credentials.body['refresh_token']);
   console.log('spotifyApi initialized');
 
-  spotifyApi.setAccessToken(credentials.body['access_token']);
   return spotifyApi;
 };
 
