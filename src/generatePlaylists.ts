@@ -21,7 +21,8 @@ const start = async () => {
 
     console.log('Code', code);
 
-    spotifyHelper.loginWithCode(code);
+    await spotifyHelper.loginWithCode(code);
+    spotifyHelper.generatePlaylists();
 
     return {};
   });

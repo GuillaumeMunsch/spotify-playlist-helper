@@ -3,7 +3,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const spotifyHelperInitializer = async () => {
-  const scopes = ['user-read-private', 'user-read-email'];
+  const scopes = [
+    'user-read-private',
+    'user-read-email',
+    'user-library-modify',
+    'user-library-read',
+  ];
   const state = 'my-private-spotify-helper';
   const redirectUri = 'http://localhost:3000/spotify-code';
   const spotifyApi = new SpotifyWebApi({
@@ -36,6 +41,11 @@ export class SpotifyHelper {
     console.log('spotifyApi initialized');
 
     return this.spotifyApi;
+  }
+
+  async generatePlaylists(): Promise<any> {
+    const myTracks = await this.getMySavedTracks();
+    console.log('My tracks', myTracks);
   }
 
   async getMySavedTracks(): Promise<SpotifyApi.UsersSavedTracksResponse> {
